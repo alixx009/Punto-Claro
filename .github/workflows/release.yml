@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Etiqueta existente que se quiere publicar o reparar, por ejemplo v1.0.0
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -24,7 +30,60 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
 
-      - name: Compilar y publicar instalador de Windows
-        run: npm run release:win
+      - name: Compilar instalador y metadatos
+        run: npm run build:win
+
+      - name: Publicar instalador y archivos del actualizador
+        shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          $ErrorActionPreference = "Stop"
+          if ($env:GITHUB_EVENT_NAME -eq "workflow_dispatch") {
+            $tag = $env:RELEASE_TAG
+          } else {
+            $tag = $env:GITHUB_REF_NAME
+          }
+          $repository = $env:GITHUB_REPOSITORY
+
+          if ([string]::IsNullOrWhiteSpace($tag)) {
+            throw "No se indicó la etiqueta de la Release."
+          }
+          $packageVersion = (Get-Content "package.json" -Raw | ConvertFrom-Json).version
+          if ($tag -ne "v$packageVersion") {
+            throw "La etiqueta $tag no coincide con la versión $packageVersion de package.json."
+          }
+
+          $installers = @(Get-ChildItem -Path "dist" -Filter "Punto-Claro-*-setup.exe" -File)
+          $blockmaps = @(Get-ChildItem -Path "dist" -Filter "Punto-Claro-*-setup.exe.blockmap" -File)
+          $latestYml = Join-Path $PWD "dist/latest.yml"
+
+          if ($installers.Count -ne 1) {
+            throw "Se esperaba un instalador Punto-Claro y se encontraron $($installers.Count)."
+          }
+          if ($blockmaps.Count -ne 1) {
+            throw "Se esperaba un archivo .blockmap y se encontraron $($blockmaps.Count)."
+          }
+          if (-not (Test-Path $latestYml)) {
+            throw "No se encontró dist/latest.yml, necesario para electron-updater."
+          }
+
+          $assets = @(
+            $installers[0].FullName
+            $blockmaps[0].FullName
+            (Resolve-Path $latestYml).Path
+          )
+
+          gh release view $tag --repo $repository *> $null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create $tag --repo $repository --title $tag --generate-notes
+            if ($LASTEXITCODE -ne 0) {
+              throw "No se pudo crear la Release de GitHub $tag."
+            }
+          }
+
+          gh release upload $tag @assets --repo $repository --clobber
+          if ($LASTEXITCODE -ne 0) {
+            throw "No se pudieron subir todos los archivos a la Release $tag."
+          }
