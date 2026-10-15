@@ -1,0 +1,27 @@
+node_modules
+dist
+out
+.DS_Store
+.eslintcache
+.npm-cache
+.local
+prompts
+*.log*
+
+# Local environment variables and credentials
+.env
+.env.*
+!.env.example
+
+# Local application databases and database journals
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# Local Windows signing certificates
+*.p12
+*.pfx
+
+# Per-machine coding agent state
+.kilo/
