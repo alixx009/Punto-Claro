@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: pos-app
+appId: com.alixx009.puntoclaro
+productName: Punto Claro
 directories:
   buildResources: build
 files:
@@ -14,9 +14,11 @@ files:
 asarUnpack:
   - resources/**
 win:
+  target: nsis
+  icon: src/renderer/src/assets/app-icon.ico
   executableName: pos-app
 nsis:
-  artifactName: ${name}-${version}-setup.${ext}
+  artifactName: Punto-Claro-${version}-setup.${ext}
   shortcutName: ${productName}
   uninstallDisplayName: ${productName}
   createDesktopShortcut: always
@@ -41,5 +43,8 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://example.com/auto-updates
+  provider: github
+  owner: alixx009
+  repo: Punto-Claro
+  private: false
+  releaseType: release

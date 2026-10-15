@@ -4,6 +4,7 @@ import type { AuthApi, UsersApi } from "../shared/auth";
 import type { SuppliersApi } from "../shared/suppliers";
 import type { PurchasesApi } from "../shared/purchases";
 import type { ProductImportApi } from "../shared/product-import";
+import type { UpdatesApi } from "../shared/updates";
 import type {
   CreateSaleReturnInput,
   SaleReturnDetail,
@@ -108,6 +109,7 @@ declare global {
       app: {
         getTimezone: () => Promise<string>;
       };
+      updates: UpdatesApi;
       printers: {
         printNote: (input: PrintSaleNoteInput) => Promise<PrintNoteResult>;
         list: () => Promise<SystemPrinter[]>;

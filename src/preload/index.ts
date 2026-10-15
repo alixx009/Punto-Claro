@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from "electron";
+import { contextBridge, ipcRenderer, type IpcRendererEvent } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
 import { IPC_CHANNELS } from "../shared/ipc";
 import { AUTH_CHANNELS } from "../shared/auth";
@@ -10,6 +10,8 @@ import {
   PRODUCT_IMPORT_CHANNELS,
   type ProductImportApi,
 } from "../shared/product-import";
+import { UPDATE_CHANNELS } from "../shared/updates";
+import type { UpdatesApi, UpdateState } from "../shared/updates";
 import type {
   CreateSaleReturnInput,
   SaleReturnDetail,
@@ -191,6 +193,22 @@ const api = {
     getTimezone: (): Promise<string> =>
       ipcRenderer.invoke(IPC_CHANNELS.appGetTimezone),
   },
+  updates: {
+    getState: (): Promise<UpdateState> =>
+      ipcRenderer.invoke(UPDATE_CHANNELS.getState),
+    check: (): Promise<UpdateState> =>
+      ipcRenderer.invoke(UPDATE_CHANNELS.check),
+    download: (): Promise<void> =>
+      ipcRenderer.invoke(UPDATE_CHANNELS.download),
+    install: (): Promise<void> =>
+      ipcRenderer.invoke(UPDATE_CHANNELS.install),
+    onStateChanged: (listener) => {
+      const handler = (_event: IpcRendererEvent, state: UpdateState): void =>
+        listener(state);
+      ipcRenderer.on(UPDATE_CHANNELS.stateChanged, handler);
+      return () => ipcRenderer.removeListener(UPDATE_CHANNELS.stateChanged, handler);
+    },
+  } satisfies UpdatesApi,
   printers: {
     printNote: (input: PrintSaleNoteInput): Promise<PrintNoteResult> =>
       ipcRenderer.invoke(IPC_CHANNELS.printersPrintNote, input),

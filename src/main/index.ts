@@ -1,4 +1,5 @@
 import { app, shell, BrowserWindow } from "electron";
+import { mkdirSync } from "fs";
 import { join } from "path";
 import { pathToFileURL } from "url";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
@@ -6,6 +7,13 @@ import icon from "../../resources/icon.png?asset";
 import { initDatabase, closeDatabase } from "./db/database";
 import { registerIpcHandlers } from "./ipc-handlers";
 import { trustAppWindow } from "./ipc-security";
+import { initializeUpdates } from "./updates";
+
+// Keep using the data folder from the existing pos-app installation even
+// though the installer now displays the stable product name "Punto Claro".
+const userDataPath = join(app.getPath("appData"), "pos-app");
+mkdirSync(userDataPath, { recursive: true });
+app.setPath("userData", userDataPath);
 
 function detectTimezone(): string {
   if (process.env.POS_TZ) return process.env.POS_TZ;
@@ -54,9 +62,10 @@ function createWindow(): void {
 }
 
 app.whenReady().then(() => {
-  electronApp.setAppUserModelId("com.electron");
+  electronApp.setAppUserModelId("com.alixx009.puntoclaro");
   initDatabase();
   registerIpcHandlers();
+  initializeUpdates();
   app.on("browser-window-created", (_, window) =>
     optimizer.watchWindowShortcuts(window),
   );
