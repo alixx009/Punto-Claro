@@ -1,34 +1,40 @@
-# pos-app
+# POS App
 
-An Electron application with React and TypeScript
+Sistema de punto de venta para tiendas y comercios. Administra ventas, inventario, clientes, proveedores y compras; imprime tickets, registra devoluciones y cortes de caja, consulta reportes e importa o exporta productos con Excel. La información se almacena localmente.
 
-## Recommended IDE Setup
+## Funciones
 
-- [VSCode](https://code.visualstudio.com/) + [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) + [Prettier](https://marketplace.visualstudio.com/items?itemName=esbenp.prettier-vscode)
+- Registro de ventas, cobros y devoluciones.
+- Administración de productos, existencias, clientes y proveedores.
+- Control de caja, cortes y reportes.
+- Impresión de tickets térmicos y notas de venta.
+- Importación y exportación de productos en Excel.
+- Usuarios con roles y permisos.
+- Base de datos local SQLite.
 
-## Project Setup
+## Desarrollo
 
-### Install
+Instala las dependencias:
 
 ```bash
-$ npm install
+npm install
 ```
 
-### Development
+Inicia la aplicación en modo desarrollo:
 
 ```bash
-$ npm run dev
+npm run dev
 ```
 
-### Build
+## Crear instalador
 
 ```bash
-# For windows
-$ npm run build:win
+# Windows
+npm run build:win
 
-# For macOS
-$ npm run build:mac
+# macOS
+npm run build:mac
 
-# For Linux
-$ npm run build:linux
+# Linux
+npm run build:linux
 ```
